@@ -2,14 +2,13 @@
 #include <eigen3/Eigen/Eigen>
 #include "common.h"
 
-void getRectangleConst(std::vector<Eigen::Vector3d> statelist) {
+void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen::MatrixXd> hPolys_) {
   hPolys_.clear();
   GridMap2D grid_map;
   map_itf_->GetObstacleMap(&grid_map);
   double resolution = grid_map.dims_resolution(0);
   double step = resolution * 1.0;
   double limitBound = 10.0;
-  visualization_msgs::Marker carMarkers;
   //generate a rectangle for this state px py yaw
   for(const auto state : statelist){
     //generate a hPoly
@@ -26,63 +25,6 @@ void getRectangleConst(std::vector<Eigen::Vector3d> statelist) {
         sin(yaw), cos(yaw);
     common::VehicleParam vptest;
     map_itf_->CheckIfCollisionUsingPosAndYaw(vptest,state,&test);
-    if(test){
-      ROS_WARN(
-          "init traj is not safe?"
-      );
-      std::cout<<"yaw: "<<yaw<<"\n";
-      carMarkers.action = visualization_msgs::Marker::ADD;
-      carMarkers.id = 0;
-      carMarkers.type = visualization_msgs::Marker::LINE_LIST;
-      carMarkers.pose.orientation.w = 1.00;
-      carMarkers.ns = "libaicorridorF";
-      carMarkers.color.r = 0.00;
-      carMarkers.color.g = 0.00;
-      carMarkers.color.b = 0.00;
-      carMarkers.color.a = 1.00;
-      carMarkers.scale.x = 0.05;
-      carMarkers.header.frame_id = "map";
-      geometry_msgs::Point point1;
-      geometry_msgs::Point point2;
-      geometry_msgs::Point point3;
-      geometry_msgs::Point point4;
-      Eigen::Matrix2d R;
-      R << cos(yaw),-sin(yaw),
-          sin(yaw),cos(yaw);
-      Eigen::Vector2d offset1, tmp1;
-      offset1 = R*Eigen::Vector2d(vptest.length()/2.0+vptest.d_cr(),vptest.width()/2.0);
-      tmp1 = state.head(2)+offset1;
-      point1.x = tmp1[0];
-      point1.y = tmp1[1];
-      point1.z = 0;
-      Eigen::Vector2d offset2, tmp2;
-      offset2 = R*Eigen::Vector2d(vptest.length()/2.0+vptest.d_cr(),-vptest.width()/2.0);
-      tmp2 = state.head(2)+offset2;
-      point2.x = tmp2[0];
-      point2.y = tmp2[1];
-      point2.z = 0;
-      Eigen::Vector2d offset3, tmp3;
-      offset3 = R*Eigen::Vector2d(-vptest.length()/2.0+vptest.d_cr(),-vptest.width()/2.0);
-      tmp3 = state.head(2)+offset3;
-      point3.x = tmp3[0];
-      point3.y = tmp3[1];
-      point3.z = 0;
-      Eigen::Vector2d offset4, tmp4;
-      offset4 = R*Eigen::Vector2d(-vptest.length()/2.0+vptest.d_cr(),vptest.width()/2.0);
-      tmp4 = state.head(2)+offset4;
-      point4.x = tmp4[0];
-      point4.y = tmp4[1];
-      point4.z = 0;
-      carMarkers.points.push_back(point1);
-      carMarkers.points.push_back(point2);
-      carMarkers.points.push_back(point2);
-      carMarkers.points.push_back(point3);
-      carMarkers.points.push_back(point3);
-      carMarkers.points.push_back(point4);
-      carMarkers.points.push_back(point4);
-      carMarkers.points.push_back(point1);
-
-    }
 
     Eigen::Vector4d expandLength;
     expandLength << 0.0, 0.0, 0.0, 0.0;
@@ -255,11 +197,16 @@ void getRectangleConst(std::vector<Eigen::Vector3d> statelist) {
     hPoly.col(3).tail<2>() = point4;
     hPolys_.push_back(hPoly);
   };
-  DebugCorridorPub.publish(carMarkers);
-  return kSuccess;
 }
 int main() {
   std::cout << "Hello, World!" << std::endl;
-  Eigen:
+  std::vector<Eigen::Vector3d> statelist;
+  std::vector<Eigen::MatrixXd> hPolys;
+  bool is_ok = getRectangleConst(statelist, hPolys);
+  if (is_ok) {
+    std::cout << "have safe h polys" << std::endl;
+  } else {
+    std::cout << "Error! no safe h polys" << std::endl;
+  }
   return 0;
 }

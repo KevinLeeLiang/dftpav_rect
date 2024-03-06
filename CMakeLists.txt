@@ -4,5 +4,4 @@ include_directories(
         ${EIGEN3_INCLUDE_DIRS}
 )
 set(CMAKE_CXX_STANDARD 14)
-
 add_executable(dftpav_rect main.cpp common.h)
