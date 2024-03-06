@@ -18,6 +18,7 @@
 #include "grid_collision_detection.h"
 #include "../obstacle/obstacle_interface.h"
 
+PLANNING_NAMESPACE_START
 
 class GridMap : public GridCollisionDetection {
   public:
@@ -33,4 +34,5 @@ class GridMap : public GridCollisionDetection {
     uint64_t map_width_;
 };
 
+PLANNING_NAMESPACE_END
 #endif // GIRD_MAP_H

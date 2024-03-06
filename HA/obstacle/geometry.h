@@ -16,6 +16,7 @@
 #include "parking_planning/apa/common/planning_typedef.h"
 #include "parking_planning/apa/common/pose2d.h"
 
+PLANNING_NAMESPACE_START
 namespace HA {
 enum class ObstacleType : int {
     VIRTUAL = 0,
@@ -110,5 +111,6 @@ inline bool operator==(const Pose2d &lhs, const Pose2d &rhs) {
 
 inline bool operator!=(const Pose2d &lhs, const Pose2d &rhs) { return !operator==(lhs, rhs); }
 };
+PLANNING_NAMESPACE_END
 
 #endif // GEOMETRY_H

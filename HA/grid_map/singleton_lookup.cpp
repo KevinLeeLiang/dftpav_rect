@@ -15,6 +15,7 @@
 #include <math.h>
 #include <vector>
 
+PLANNING_NAMESPACE_START
 SingletonLookup *SingletonLookup::m_plan_config = nullptr;
 
 struct point {
@@ -317,3 +318,4 @@ void SingletonLookup::init() {
     // 初始化lookup
     collisionLookup(collisionLookuptable);
 }
+PLANNING_NAMESPACE_END

@@ -14,6 +14,7 @@
 #include "grid_map.h"
 #include <limits>
 
+PLANNING_NAMESPACE_START
 
 GridMap::GridMap() {
     this->map_length_ = 0;
@@ -48,6 +49,10 @@ void GridMap::BuildGridMap(const std::vector<Vec2d> &obs, const Box2d &map_bound
         grid_map[index_x][index_y] = 1;
     }
 
+    MLOG(PARKING_PLANNING, INFO) << "map_bound";
+    MLOG(PARKING_PLANNING, INFO) << map_bound.min_x() << "," << map_bound.min_y() << "," << map_bound.max_x() << ","
+                                 << map_bound.max_y() << "," << map_bound.width() << "," << map_bound.length();
+    MLOG(PARKING_PLANNING, INFO) << "grid_map start";
 //    std::string s;
 //    for (size_t i = 0; i < grid_map.size(); i++) {
 //        for (size_t j = 0; j < grid_map.at(i).size(); j++) {
@@ -57,9 +62,14 @@ void GridMap::BuildGridMap(const std::vector<Vec2d> &obs, const Box2d &map_bound
 //        MLOG(PARKING_PLANNING, INFO) << s;
 //        s = "";
 //    }
+     MLOG(PARKING_PLANNING, INFO) << "grid_map end";
 
     this->setGridOri(map_bound.min_x(), map_bound.min_y());
+    MLOG(PARKING_PLANNING, INFO) << "finish setGridOri";
     this->setGridSize(this->map_width_, this->map_length_);
+    MLOG(PARKING_PLANNING, INFO) << "finish setGridSize";
     this->updateGrid(this->grid_map);
     this->updateLookupTable();
 }
+
+PLANNING_NAMESPACE_END

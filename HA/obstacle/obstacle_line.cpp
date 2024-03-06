@@ -12,6 +12,7 @@
 //
 
 #include "obstacle_line.h"
+PLANNING_NAMESPACE_START
 
 double SBPObstacleLine::get_cost(const SearchNode::Ptr &node, VehicleModel &vehicle_model) { return 0; }
 
@@ -64,3 +65,5 @@ SBPObstacleLine::SBPObstacleLine(const std::vector<ObstacleLineTmp> &lines)
     : lines_(lines) {}
 
 SBPObstacleLine::~SBPObstacleLine() {}
+
+PLANNING_NAMESPACE_END

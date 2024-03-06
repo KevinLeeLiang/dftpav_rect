@@ -13,6 +13,7 @@
 
 #include "grid_collision_detection.h"
 
+PLANNING_NAMESPACE_START
 
 void GridCollisionDetection::setGridSize(int width, int length){
     this->width_ = width;
@@ -58,6 +59,7 @@ bool GridCollisionDetection::configurationTest(double x, double y, double t, boo
         return true;
     }
     if (test) {
+        MLOG(PARKING_PLANNING, INFO) << "Vehicle_Grid_Model_Start";
         std::string s = "vehicle ";
         for (int i = 0; i < collisionLookuptable[idx].length; ++i) {
 
@@ -69,6 +71,8 @@ bool GridCollisionDetection::configurationTest(double x, double y, double t, boo
                 continue;
             }
         }
+        MLOG(PARKING_PLANNING, INFO) << s;
+        MLOG(PARKING_PLANNING, INFO) << "Vehicle_Grid_Model_End";
     }
     for (int i = 0; i < collisionLookuptable[idx].length; ++i) {
 
@@ -98,3 +102,5 @@ void GridCollisionDetection::setGridOri(const double x_min, const double y_min) 
 void GridCollisionDetection::updateLookupTable() {
     memcpy(collisionLookuptable, SingletonLookup::GetInstance()->collisionLookuptable, sizeof(collisionLookuptable));
 }
+
+PLANNING_NAMESPACE_END

@@ -20,6 +20,8 @@
 #include <cstring>
 #include <vector>
 
+PLANNING_NAMESPACE_START
+
 class GridCollisionDetection {
   public:
     GridCollisionDetection()
@@ -58,4 +60,5 @@ class GridCollisionDetection {
     int length_ = 0;
 };
 
+PLANNING_NAMESPACE_END
 #endif // GRID_COLLISION_DETECTION_H

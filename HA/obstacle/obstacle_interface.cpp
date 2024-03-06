@@ -12,6 +12,8 @@
 //
 #include "obstacle_interface.h"
 
+PLANNING_NAMESPACE_START
+
 Vec2d SBPObstacleInterface::get_single_nearest_point(const LineSegment2d &obs_line,
                                                      const LineSegment2d &ego_centerline) {
     if (obs_line.HasIntersect(ego_centerline)) {
@@ -45,3 +47,4 @@ Vec2d SBPObstacleInterface::get_single_nearest_point(const LineSegment2d &obs_li
     }
 }
 
+PLANNING_NAMESPACE_END
