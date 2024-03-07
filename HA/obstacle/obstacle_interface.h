@@ -21,7 +21,6 @@
 #include "geometry.h"
 #include "parking_planning/apa/common/vehicle_model.h"
 
-PLANNING_NAMESPACE_START
 using namespace HA;
 enum class SBPObstacleType {
     Box,
@@ -48,6 +47,5 @@ class SBPObstacleInterface {
     static Vec2d get_single_nearest_point(const LineSegment2d &obs_line, const LineSegment2d &ego_centerline);
 };
 
-PLANNING_NAMESPACE_END
 
 #endif // OBSTACLE_INTERFACE_H

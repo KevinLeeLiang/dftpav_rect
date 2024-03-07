@@ -1,9 +1,12 @@
 #include <iostream>
 #include <eigen3/Eigen/Eigen>
 #include "common.h"
+#include "HA/grid_map/grid_map.h"
 
 void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen::MatrixXd> hPolys_) {
   hPolys_.clear();
+  GridMap grid_map;
+  grid_map.BuildGridMap();
   GridMap2D grid_map;
   map_itf_->GetObstacleMap(&grid_map);
   double resolution = grid_map.dims_resolution(0);

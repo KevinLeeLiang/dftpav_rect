@@ -15,7 +15,6 @@
 #include <math.h>
 #include <vector>
 
-PLANNING_NAMESPACE_START
 SingletonLookup *SingletonLookup::m_plan_config = nullptr;
 
 struct point {
@@ -23,23 +22,18 @@ struct point {
     double y;
 };
 
-static void collisionLookup(Constants::config *lookup) {
-    MLOG(PARKING_PLANNING, INFO) << "I am building the collision lookup table...";
+static void collisionLookup(Constants::config *lookup, common::VehicleParam* ptr_veh_mode) {
     auto s_time = ::os::Time::now().to_usec();
     // float length = vehicle_param.length + vehicle_param.length_expand;
     float cellsize = Constants::cellSize;
-    float width = (VehicleConfigHelper::Instance()->GetConfig().vehicle_param().overallwidth() +
-                   2 * FLAGS_apa_vert_vehicle_lat_inflation) /
-                  cellsize;
+    float width = ptr_veh_mode->width() / cellsize;
 
     float width_half = (width / 2); //膨胀后的半车宽
 
-    float length_rear = (VehicleConfigHelper::Instance()->GetConfig().vehicle_param().rear_edge_to_center() +
-                         FLAGS_apa_vert_vehicle_lon_inflation) /
+    float length_rear = (ptr_veh_mode->length()/2) /
                         cellsize; //后轴到后端边缘长度
 
-    float length_front = (FLAGS_apa_vert_vehicle_lon_inflation +
-                          VehicleConfigHelper::Instance()->GetConfig().vehicle_param().front_edge_to_center()) /
+    float length_front = (ptr_veh_mode->length()/2) /
                          cellsize;
 
     // int bbSize = (int)((sqrt(width_half * width_half + length_front*
@@ -49,7 +43,6 @@ static void collisionLookup(Constants::config *lookup) {
     int bbSize = (int)((sqrt(width_half * width_half + length_front * length_front) + 2) / Constants::cSize);
     // cell size
     const int size = bbSize * 2;
-    MLOG(PARKING_PLANNING, INFO) << "[collisionLookup] size: " << size;
     //  const int cSize = Constants::cSize;
 
     // ______________________
@@ -295,13 +288,12 @@ static void collisionLookup(Constants::config *lookup) {
         }
     }
 
-    MLOG(PARKING_PLANNING, INFO) << "building the collision lookup table run time: "
-                                 << (::os::Time::now().to_usec() - s_time) * 1e-3 << "ms";
 }
 
 SingletonLookup *SingletonLookup::GetInstance() {
     if (nullptr == m_plan_config) {
         m_plan_config = new SingletonLookup();
+        ptr_veh_mode_ = new common::VehicleParam();
         if (!m_plan_config->getInitStatus())
             m_plan_config->init();
     }
@@ -318,4 +310,4 @@ void SingletonLookup::init() {
     // 初始化lookup
     collisionLookup(collisionLookuptable);
 }
-PLANNING_NAMESPACE_END
+

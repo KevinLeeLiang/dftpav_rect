@@ -14,13 +14,11 @@
 #ifndef SINGLETON_LOOKUP_H
 #define SINGLETON_LOOKUP_H
 #include "constant.h"
-#include "parking_planning/common/planning_gflags.h"
-#include "parking_planning/apa/common/planning_typedef.h"
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include "../../common.h"
 
-PLANNING_NAMESPACE_START
 
 class SingletonLookup {
   public:
@@ -35,13 +33,14 @@ class SingletonLookup {
   private:
     SingletonLookup(){};
     static SingletonLookup *m_plan_config;
+    static common::VehicleParam *ptr_veh_mode_;
 
   private:
     bool is_init = false;
+
 
   public:
     Constants::config collisionLookuptable[Constants::headings * Constants::positions];
 };
 
-PLANNING_NAMESPACE_END
 #endif // NODE_ERROR_SINGLETON_LOOKUP_H

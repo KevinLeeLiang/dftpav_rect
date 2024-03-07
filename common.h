@@ -17,6 +17,7 @@ namespace common {
 
 class VehicleParam {
 public:
+  inline VehicleParam() {}
   inline double width() const { return width_; }
   inline double length() const { return length_; }
   inline double wheel_base() const { return wheel_base_; }
@@ -59,6 +60,7 @@ private:
   double max_longitudinal_acc_ = 2.0;
   double max_lateral_acc_ = 2.0;
 
-  double d_cr_ = 1.015;  // length between geometry center and rear axle
-};
+  double d_cr_ = 1.015; // length between geometry center and rear axle
+}
+};     // namespace common
 #endif // DFTPAV_RECT_COMMON_H
