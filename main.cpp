@@ -3,13 +3,12 @@
 #include "common.h"
 #include "HA/grid_map/grid_map.h"
 
-void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen::MatrixXd> hPolys_) {
+void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs, std::vector<Eigen::Vector3d> statelist, std::vector<Eigen::MatrixXd> hPolys_) {
   hPolys_.clear();
   GridMap grid_map;
-  grid_map.BuildGridMap();
-  GridMap2D grid_map;
-  map_itf_->GetObstacleMap(&grid_map);
-  double resolution = grid_map.dims_resolution(0);
+  grid_map.BuildGridMap(obs, map_bound);
+
+  double resolution = 0.2;
   double step = resolution * 1.0;
   double limitBound = 10.0;
   //generate a rectangle for this state px py yaw
@@ -27,7 +26,7 @@ void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen
     egoR << cos(yaw), -sin(yaw),
         sin(yaw), cos(yaw);
     common::VehicleParam vptest;
-    map_itf_->CheckIfCollisionUsingPosAndYaw(vptest,state,&test);
+    grid_map.configurationTest(state.x(), state.y(), yaw);
 
     Eigen::Vector4d expandLength;
     expandLength << 0.0, 0.0, 0.0, 0.0;
@@ -51,7 +50,7 @@ void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen
             newpoint1 = sourcePt + egoR * Eigen::Vector2d(sourceVp.length()/2.0+sourceVp.d_cr(),sourceVp.width()/2.0+step);
             newpoint2 = sourcePt + egoR * Eigen::Vector2d(-sourceVp.length()/2.0+sourceVp.d_cr(),sourceVp.width()/2.0+step);
             //1 new1 new1 new2 new2 2
-            map_itf_->CheckIfCollisionUsingLine(point1,newpoint1,&isocc,resolution/2.0);
+            isocc = grid_map->CheckIfCollisionUsingLine(point1,newpoint1,&isocc,resolution/2.0);
             if(isocc){
               NotFinishTable[i] = 0.0;
               break;
@@ -201,15 +200,19 @@ void getRectangleConst(std::vector<Eigen::Vector3d> statelist, std::vector<Eigen
     hPolys_.push_back(hPoly);
   };
 }
+
+std::vector<POINT2D> getObstacleEnvTest() {
+  std::vector<POINT2D> obs;
+  return obs;
+}
+
 int main() {
   std::cout << "Hello, World!" << std::endl;
   std::vector<Eigen::Vector3d> statelist;
   std::vector<Eigen::MatrixXd> hPolys;
-  bool is_ok = getRectangleConst(statelist, hPolys);
-  if (is_ok) {
-    std::cout << "have safe h polys" << std::endl;
-  } else {
-    std::cout << "Error! no safe h polys" << std::endl;
-  }
+  std::vector<POINT2D> obs;
+  Box2d map_bound = Box2d(POINT2D(0,0), 40, 40);
+  getRectangleConst(map_bound, obs, statelist, hPolys);
+
   return 0;
 }
