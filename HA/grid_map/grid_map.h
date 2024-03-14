@@ -15,6 +15,7 @@
 #define GIRD_MAP_H
 
 #include "grid_collision_detection.h"
+#include <eigen3/Eigen/Eigen>
 #include <vector>
 
 typedef Eigen::Vector2d POINT2D;
@@ -86,7 +87,8 @@ class GridMap : public GridCollisionDetection {
 public:
   GridMap();
   ~GridMap();
-  void BuildGridMap(const std::vector<POINT2D> &obs, const Box2d &map_bound);
+  void BuildGridMap(const std::vector<POINT2D> &obs, Box2d &map_bound);
+  bool CheckIfCollisionUsingLine(const POINT2D p1, const POINT2D p2, const double resolution);
 
 public:
   std::vector<std::vector<int>> grid_map;

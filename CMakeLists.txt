@@ -5,4 +5,9 @@ include_directories(
         common.h
 )
 set(CMAKE_CXX_STANDARD 14)
-add_executable(dftpav_rect main.cpp )
+
+file(GLOB_RECURSE SRCS
+        HA/grid_map/*.cpp
+        )
+
+add_executable(dftpav_rect main.cpp ${SRCS})

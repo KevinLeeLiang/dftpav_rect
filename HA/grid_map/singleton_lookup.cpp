@@ -16,6 +16,7 @@
 #include <vector>
 
 SingletonLookup *SingletonLookup::m_plan_config = nullptr;
+common::VehicleParam *SingletonLookup::ptr_veh_mode_ = nullptr;
 
 struct point {
     double x;
@@ -23,7 +24,6 @@ struct point {
 };
 
 static void collisionLookup(Constants::config *lookup, common::VehicleParam* ptr_veh_mode) {
-    auto s_time = ::os::Time::now().to_usec();
     // float length = vehicle_param.length + vehicle_param.length_expand;
     float cellsize = Constants::cellSize;
     float width = ptr_veh_mode->width() / cellsize;
@@ -306,8 +306,7 @@ void SingletonLookup::init() {
         return;
 
     is_init = true;
-
     // 初始化lookup
-    collisionLookup(collisionLookuptable);
+    collisionLookup(collisionLookuptable, ptr_veh_mode_);
 }
 

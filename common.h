@@ -61,6 +61,6 @@ private:
   double max_lateral_acc_ = 2.0;
 
   double d_cr_ = 1.015; // length between geometry center and rear axle
-}
+};
 };     // namespace common
 #endif // DFTPAV_RECT_COMMON_H

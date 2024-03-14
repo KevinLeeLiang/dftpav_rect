@@ -28,7 +28,7 @@ GridMap::~GridMap() {
 }
 
 void GridMap::BuildGridMap(const std::vector<POINT2D> &obs,
-                           const Box2d &map_bound) {
+                           Box2d &map_bound) {
   float obstacle_grid_resolution = Constants::cellSize;
   this->map_width_ = uint64_t(map_bound.width() / obstacle_grid_resolution);
   this->map_length_ = uint64_t(map_bound.length() / obstacle_grid_resolution);
@@ -53,7 +53,7 @@ void GridMap::BuildGridMap(const std::vector<POINT2D> &obs,
   std::cout << "map_bound" << std::endl;
   std::cout << map_bound.x_min() << "," << map_bound.y_min() << ","
             << map_bound.x_max() << "," << map_bound.y_max() << ","
-            << map_bound.Width() << "," << map_bound.Length() << std::endl;
+            << map_bound.width() << "," << map_bound.length() << std::endl;
   std::cout << "grid_map start" << std::endl;
   //    std::string s;
   //    for (size_t i = 0; i < grid_map.size(); i++) {
@@ -68,4 +68,15 @@ void GridMap::BuildGridMap(const std::vector<POINT2D> &obs,
   this->setGridSize(this->map_width_, this->map_length_);
   this->updateGrid(this->grid_map);
   this->updateLookupTable();
+}
+
+bool GridMap::CheckIfCollisionUsingLine(const POINT2D p1, const POINT2D p2, const double resolution) {
+  double length = sqrt(pow(p1.x() - p2.x(), 2) + pow(p1.y() - p2.y(), 2));
+  POINT2D v = p2 - p1;
+  for (double d = 0; d <= length + 1e-6; d += resolution) {
+    double x = p1.x() + d*v.x();
+    double y = p1.y() + d*v.y();
+    check
+  }
+  return false;
 }

@@ -28,7 +28,7 @@ class SingletonLookup {
 
     static SingletonLookup *GetInstance();
 
-    ~SingletonLookup() { delete m_plan_config; }
+    ~SingletonLookup() { delete m_plan_config; delete ptr_veh_mode_;}
 
   private:
     SingletonLookup(){};

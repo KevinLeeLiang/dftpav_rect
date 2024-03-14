@@ -19,9 +19,11 @@
 #include "singleton_lookup.h"
 #include <cstring>
 #include <vector>
+#include <limits>
 
 class GridCollisionDetection {
   public:
+    ~GridCollisionDetection() {}
     GridCollisionDetection()
         : x_min_(std::numeric_limits<double>::max())
         , y_min_(std::numeric_limits<double>::max())
