@@ -282,6 +282,11 @@ int main() {
   std::vector<POINT2D> obs;
   Box2d map_bound = Box2d(POINT2D(0, 0), 40, 40);
   getRectangleConst(map_bound, obs, statelist, hPolys);
-
+  for (int i = 0; i < hPolys.size(); i++) {
+    std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)
+              << "," << hPolys[i](1, 0) << "," << hPolys[i](1, 1)
+              << "," << hPolys[i](2, 0) << "," << hPolys[i](2, 1)
+              << "," << hPolys[i](3, 0) << "," << hPolys[i](3, 1) << std::endl;
+  }
   return 0;
 }

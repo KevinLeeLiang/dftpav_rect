@@ -73,10 +73,12 @@ void GridMap::BuildGridMap(const std::vector<POINT2D> &obs,
 bool GridMap::CheckIfCollisionUsingLine(const POINT2D p1, const POINT2D p2, const double resolution) {
   double length = sqrt(pow(p1.x() - p2.x(), 2) + pow(p1.y() - p2.y(), 2));
   POINT2D v = p2 - p1;
+
   for (double d = 0; d <= length + 1e-6; d += resolution) {
     double x = p1.x() + d*v.x();
     double y = p1.y() + d*v.y();
-    check
+    if (this->checkPointInGridMap(x, y))
+      return true;
   }
   return false;
 }

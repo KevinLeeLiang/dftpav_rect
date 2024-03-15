@@ -48,6 +48,8 @@ class GridCollisionDetection {
 
     void updateLookupTable();
 
+    bool checkPointInGridMap(const double x, const double y);
+
     std::vector<std::vector<int>> grid;
     std::vector<int> gridmap;
 

@@ -99,3 +99,11 @@ void GridCollisionDetection::setGridOri(const double x_min, const double y_min) 
 void GridCollisionDetection::updateLookupTable() {
     memcpy(collisionLookuptable, SingletonLookup::GetInstance()->collisionLookuptable, sizeof(collisionLookuptable));
 }
+
+bool GridCollisionDetection::checkPointInGridMap(const double x, const double y) {
+  int X = (int)((x - this->x_min_) / Constants::cellSize);
+  int Y = (int)((y - this->y_min_) / Constants::cellSize);
+  if (grid[X][Y])
+    return true;
+  return false;
+}
