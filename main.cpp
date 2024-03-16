@@ -2,6 +2,7 @@
 #include "common.h"
 #include <eigen3/Eigen/Eigen>
 #include <iostream>
+#include <fstream>
 
 void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
                        std::vector<Eigen::Vector3d> statelist,
@@ -270,17 +271,48 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
   };
 }
 
-std::vector<POINT2D> getObstacleEnvTest() {
+
+
+POINT2D getPoint2dFromStringLine(std::string line) {
+  std::vector<std::string>tokens;
+  std::istringstream iss(line);
+  std::string token;
+
+  while (std::getline(iss, token, ',')) {
+    tokens.push_back(token);
+  }
+  return POINT2D(std::stod(tokens[0]), std::stod(tokens[1]));
+}
+
+std::vector<POINT2D> getObstacleEnvTest(Box2d & map_bound) {
+  map_bound = Box2d(POINT2D(0, 0), 50, 50);
   std::vector<POINT2D> obs;
+  std::ifstream file; // 打开名为example.txt的文件
+  file.open("../Sim/example.txt");
+  if (file.is_open()) { // 检查文件是否成功打开
+    std::string line;
+    while (std::getline(file, line)) { // 逐行读取文件内容
+      obs.push_back(getPoint2dFromStringLine(line));
+    }
+
+    file.close(); // 关闭文件
+  } else {
+    std::cerr << "无法打开文件" << std::endl; // 打开文件失败时输出错误信息
+  }
+
   return obs;
 }
+
+
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
   std::vector<Eigen::Vector3d> statelist;
   std::vector<Eigen::MatrixXd> hPolys;
-  std::vector<POINT2D> obs;
-  Box2d map_bound = Box2d(POINT2D(0, 0), 40, 40);
+
+  Box2d map_bound = Box2d(POINT2D(0, 0), 50, 50);
+  std::vector<POINT2D> obs = getObstacleEnvTest(map_bound);
+
   getRectangleConst(map_bound, obs, statelist, hPolys);
   for (int i = 0; i < hPolys.size(); i++) {
     std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)
