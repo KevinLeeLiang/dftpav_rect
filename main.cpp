@@ -304,15 +304,32 @@ std::vector<POINT2D> getObstacleEnvTest(Box2d & map_bound) {
 }
 
 
+std::vector<POINT2D> getStatesTest() {
+  std::vector<POINT2D> states;
+  std::ifstream file; // 打开名为example.txt的文件
+  file.open("../Sim/path.txt");
+  if (file.is_open()) { // 检查文件是否成功打开
+    std::string line;
+    while (std::getline(file, line)) { // 逐行读取文件内容
+      states.push_back(getPoint2dFromStringLine(line));
+    }
+
+    file.close(); // 关闭文件
+  } else {
+    std::cerr << "无法打开文件" << std::endl; // 打开文件失败时输出错误信息
+  }
+
+  return obs;
+}
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
-  std::vector<Eigen::Vector3d> statelist;
+
   std::vector<Eigen::MatrixXd> hPolys;
 
   Box2d map_bound = Box2d(POINT2D(0, 0), 50, 50);
   std::vector<POINT2D> obs = getObstacleEnvTest(map_bound);
-
+  std::vector<Eigen::Vector3d> statelist = getStatesTest();
   getRectangleConst(map_bound, obs, statelist, hPolys);
   for (int i = 0; i < hPolys.size(); i++) {
     std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)

@@ -42,13 +42,14 @@ def test():
   count = 5
   path1 = calculate_point_on_arc(r1, (xc1, yc1), 270, 360, count)
   path2 = calculate_point_on_arc(r2, (xc2, yc2), 90, 180, count)
+  path2 = path2[::-1]
 
   with open('../Sim/path.txt', 'w') as file:
-    for x in p1_2:
-      s = str(x) + ',' + str(y1) + '\n'
+    for p in path1:
+      s = str(p[0]) + ',' + str(p[1]) + '\n'
       file.write(s)
-    for y in p2_3:
-      s = str(x2) + ',' + str(y)+ '\n'
+    for p in path2:
+      s = str(p[0]) + ',' + str(p[1]) + '\n'
       file.write(s)
   file.close()
 
