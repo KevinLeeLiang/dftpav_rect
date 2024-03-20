@@ -19,6 +19,7 @@
 #include <vector>
 
 typedef Eigen::Vector2d POINT2D;
+typedef Eigen::Vector3d POINT3D;
 
 class Box2d {
 private:

@@ -1,13 +1,70 @@
 #include "HA/grid_map/grid_map.h"
 #include "common.h"
 #include <eigen3/Eigen/Eigen>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
-void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
-                       std::vector<Eigen::Vector3d> statelist,
-                       std::vector<Eigen::MatrixXd> hPolys_) {
-  hPolys_.clear();
+POINT3D getPoint3dFromStringLine(std::string line) {
+  std::vector<std::string> tokens;
+  std::istringstream iss(line);
+  std::string token;
+
+  while (std::getline(iss, token, ',')) {
+    tokens.push_back(token);
+  }
+  return POINT3D(std::stod(tokens[0]), std::stod(tokens[1]), std::stod(tokens[2]));
+}
+
+POINT2D getPoint2dFromStringLine(std::string line) {
+  std::vector<std::string> tokens;
+  std::istringstream iss(line);
+  std::string token;
+
+  while (std::getline(iss, token, ',')) {
+    tokens.push_back(token);
+  }
+  return POINT2D(std::stod(tokens[0]), std::stod(tokens[1]));
+}
+
+std::vector<POINT2D> getObstacleEnvTest(Box2d &map_bound) {
+  map_bound = Box2d(POINT2D(0, 0), 50, 50);
+  std::vector<POINT2D> obs;
+  std::ifstream file;// 打开名为example.txt的文件
+  file.open("../Sim/example.txt");
+  if (file.is_open()) {// 检查文件是否成功打开
+    std::string line;
+    while (std::getline(file, line)) {// 逐行读取文件内容
+      obs.push_back(getPoint2dFromStringLine(line));
+    }
+
+    file.close();// 关闭文件
+  } else {
+    std::cerr << "无法打开文件" << std::endl;// 打开文件失败时输出错误信息
+  }
+
+  return obs;
+}
+
+std::vector<POINT3D> getStatesTest() {
+  std::vector<Eigen::Vector3d> states;
+  std::ifstream file;// 打开名为example.txt的文件
+  file.open("../Sim/path.txt");
+  if (file.is_open()) {// 检查文件是否成功打开
+    std::string line;
+    while (std::getline(file, line)) {// 逐行读取文件内容
+      states.push_back(getPoint3dFromStringLine(line));
+    }
+
+    file.close();// 关闭文件
+  } else {
+    std::cerr << "无法打开文件" << std::endl;// 打开文件失败时输出错误信息
+  }
+
+  return states;
+}
+
+std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POINT2D> obs, std::vector<POINT3D> statelist) {
+  std::vector<Eigen::MatrixXd> hPolys_;
   GridMap grid_map;
   grid_map.BuildGridMap(obs, map_bound);
 
@@ -49,10 +106,10 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
           //+dy
           case 0:
             point1 = sourcePt + egoR * Eigen::Vector2d(sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        sourceVp.width() / 2.0);
             point2 = sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        sourceVp.width() / 2.0);
             newpoint1 =
                 sourcePt +
@@ -94,18 +151,18 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
             //+dx
           case 1:
             point1 = sourcePt + egoR * Eigen::Vector2d(sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        -sourceVp.width() / 2.0);
             point2 = sourcePt + egoR * Eigen::Vector2d(sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        sourceVp.width() / 2.0);
             newpoint1 =
                 sourcePt + egoR * Eigen::Vector2d(step + sourceVp.length() / 2.0 +
-                                                      sourceVp.d_cr(),
+                                                  sourceVp.d_cr(),
                                                   -sourceVp.width() / 2.0);
             newpoint2 =
                 sourcePt + egoR * Eigen::Vector2d(step + sourceVp.length() / 2.0 +
-                                                      sourceVp.d_cr(),
+                                                  sourceVp.d_cr(),
                                                   sourceVp.width() / 2.0);
             // 1 new1 new1 new2 new2 2
             isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
@@ -139,10 +196,10 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
             //-dy
           case 2:
             point1 = sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        -sourceVp.width() / 2.0);
             point2 = sourcePt + egoR * Eigen::Vector2d(sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        -sourceVp.width() / 2.0);
             newpoint1 =
                 sourcePt +
@@ -184,18 +241,18 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
             //-dx
           case 3:
             point1 = sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        sourceVp.width() / 2.0);
             point2 = sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                           sourceVp.d_cr(),
+                                                       sourceVp.d_cr(),
                                                        -sourceVp.width() / 2.0);
             newpoint1 =
                 sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                      sourceVp.d_cr() - step,
+                                                  sourceVp.d_cr() - step,
                                                   sourceVp.width() / 2.0);
             newpoint2 =
                 sourcePt + egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 +
-                                                      sourceVp.d_cr() - step,
+                                                  sourceVp.d_cr() - step,
                                                   -sourceVp.width() / 2.0);
             // 1 new1 new1 new2 new2 2
             isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
@@ -232,7 +289,7 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
     Eigen::Vector2d point1, norm1;
     point1 =
         rawPt + egoR * Eigen::Vector2d(rawVp.length() / 2.0 + rawVp.d_cr() +
-                                           expandLength[1],
+                                       expandLength[1],
                                        rawVp.width() / 2.0 + expandLength[0]);
     norm1 << -sin(yaw), cos(yaw);
     hPoly.col(0).head<2>() = norm1;
@@ -242,7 +299,7 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
     // sourcePt+egoR*Eigen::Vector2d(sourceVp.length()/2.0+sourceVp.d_cr(),-sourceVp.width()/2.0);
     point2 =
         rawPt + egoR * Eigen::Vector2d(rawVp.length() / 2.0 + rawVp.d_cr() +
-                                           expandLength[1],
+                                       expandLength[1],
                                        -rawVp.width() / 2.0 - expandLength[2]);
     norm2 << cos(yaw), sin(yaw);
     hPoly.col(1).head<2>() = norm2;
@@ -252,7 +309,7 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
     // sourcePt+egoR*Eigen::Vector2d(-sourceVp.length()/2.0+sourceVp.d_cr(),-sourceVp.width()/2.0);
     point3 =
         rawPt + egoR * Eigen::Vector2d(-rawVp.length() / 2.0 + rawVp.d_cr() -
-                                           expandLength[3],
+                                       expandLength[3],
                                        -rawVp.width() / 2.0 - expandLength[2]);
     norm3 << sin(yaw), -cos(yaw);
     hPoly.col(2).head<2>() = norm3;
@@ -262,75 +319,32 @@ void getRectangleConst(Box2d map_bound, std::vector<POINT2D> &obs,
     // sourcePt+egoR*Eigen::Vector2d(-sourceVp.length()/2.0+sourceVp.d_cr(),sourceVp.width()/2.0);
     point4 =
         rawPt + egoR * Eigen::Vector2d(-rawVp.length() / 2.0 + rawVp.d_cr() -
-                                           expandLength[3],
+                                       expandLength[3],
                                        rawVp.width() / 2.0 + expandLength[0]);
     norm4 << -cos(yaw), -sin(yaw);
     hPoly.col(3).head<2>() = norm4;
     hPoly.col(3).tail<2>() = point4;
     hPolys_.push_back(hPoly);
-  };
+  }
+  return hPolys_;
 }
 
-
-
-POINT2D getPoint2dFromStringLine(std::string line) {
-  std::vector<std::string>tokens;
-  std::istringstream iss(line);
-  std::string token;
-
-  while (std::getline(iss, token, ',')) {
-    tokens.push_back(token);
-  }
-  return POINT2D(std::stod(tokens[0]), std::stod(tokens[1]));
-}
-
-std::vector<POINT2D> getObstacleEnvTest(Box2d & map_bound) {
-  map_bound = Box2d(POINT2D(0, 0), 50, 50);
-  std::vector<POINT2D> obs;
-  std::ifstream file; // 打开名为example.txt的文件
-  file.open("../Sim/example.txt");
-  if (file.is_open()) { // 检查文件是否成功打开
-    std::string line;
-    while (std::getline(file, line)) { // 逐行读取文件内容
-      obs.push_back(getPoint2dFromStringLine(line));
-    }
-
-    file.close(); // 关闭文件
-  } else {
-    std::cerr << "无法打开文件" << std::endl; // 打开文件失败时输出错误信息
-  }
-
-  return obs;
-}
-
-
-std::vector<POINT2D> getStatesTest() {
-  std::vector<POINT2D> states;
-  std::ifstream file; // 打开名为example.txt的文件
-  file.open("../Sim/path.txt");
-  if (file.is_open()) { // 检查文件是否成功打开
-    std::string line;
-    while (std::getline(file, line)) { // 逐行读取文件内容
-      states.push_back(getPoint2dFromStringLine(line));
-    }
-
-    file.close(); // 关闭文件
-  } else {
-    std::cerr << "无法打开文件" << std::endl; // 打开文件失败时输出错误信息
-  }
-
-  return obs;
+std::vector<Eigen::MatrixXd> tttt(Box2d map_bound, const std::vector<POINT2D> obs, std::vector<POINT3D> statelist) {
+  std::vector<Eigen::MatrixXd> hPolys_;
+  return hPolys_;
 }
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
-
   std::vector<Eigen::MatrixXd> hPolys;
-
+  GridMap grid_map;
   Box2d map_bound = Box2d(POINT2D(0, 0), 50, 50);
   std::vector<POINT2D> obs = getObstacleEnvTest(map_bound);
-  std::vector<Eigen::Vector3d> statelist = getStatesTest();
-  getRectangleConst(map_bound, obs, statelist, hPolys);
+  std::vector<POINT3D> statelist = getStatesTest();
+  std::vector<POINT2D> test_obs;
+  std::vector<POINT3D> test_states;
+//  hPolys = getRectangleConst(map_bound, test_obs, test_states);
+  hPolys = tttt(map_bound, obs, statelist);
   for (int i = 0; i < hPolys.size(); i++) {
     std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)
               << "," << hPolys[i](1, 0) << "," << hPolys[i](1, 1)
