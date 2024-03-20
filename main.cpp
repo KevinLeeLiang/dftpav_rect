@@ -3,7 +3,7 @@
 #include <eigen3/Eigen/Eigen>
 #include <fstream>
 #include <iostream>
-
+#include <memory>
 POINT3D getPoint3dFromStringLine(std::string line) {
   std::vector<std::string> tokens;
   std::istringstream iss(line);
@@ -26,8 +26,7 @@ POINT2D getPoint2dFromStringLine(std::string line) {
   return POINT2D(std::stod(tokens[0]), std::stod(tokens[1]));
 }
 
-std::vector<POINT2D> getObstacleEnvTest(Box2d &map_bound) {
-  map_bound = Box2d(POINT2D(0, 0), 50, 50);
+std::vector<POINT2D> getObstacleEnvTest() {
   std::vector<POINT2D> obs;
   std::ifstream file;// 打开名为example.txt的文件
   file.open("../Sim/example.txt");
@@ -65,8 +64,8 @@ std::vector<POINT3D> getStatesTest() {
 
 std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POINT2D> obs, std::vector<POINT3D> statelist) {
   std::vector<Eigen::MatrixXd> hPolys_;
-  GridMap grid_map;
-  grid_map.BuildGridMap(obs, map_bound);
+  std::shared_ptr<GridMap> grid_map = std::make_shared<GridMap>();
+  grid_map->BuildGridMap(obs, map_bound);
 
   double resolution = 0.2;
   double step = resolution * 1.0;
@@ -86,7 +85,7 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
     Eigen::Matrix2d egoR;
     egoR << cos(yaw), -sin(yaw), sin(yaw), cos(yaw);
     common::VehicleParam vptest;
-    grid_map.configurationTest(state.x(), state.y(), yaw);
+    grid_map->configurationTest(state.x(), state.y(), yaw);
 
     Eigen::Vector4d expandLength;
     expandLength << 0.0, 0.0, 0.0, 0.0;
@@ -120,19 +119,19 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
                 egoR * Eigen::Vector2d(-sourceVp.length() / 2.0 + sourceVp.d_cr(),
                                        sourceVp.width() / 2.0 + step);
             // 1 new1 new1 new2 new2 2
-            isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
+            isocc = grid_map->CheckIfCollisionUsingLine(point1, newpoint1,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint1, newpoint2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint1, newpoint2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint2, point2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint2, point2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
@@ -165,19 +164,19 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
                                                   sourceVp.d_cr(),
                                                   sourceVp.width() / 2.0);
             // 1 new1 new1 new2 new2 2
-            isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
+            isocc = grid_map->CheckIfCollisionUsingLine(point1, newpoint1,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint1, newpoint2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint1, newpoint2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint2, point2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint2, point2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
@@ -210,19 +209,19 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
                 egoR * Eigen::Vector2d(sourceVp.length() / 2.0 + sourceVp.d_cr(),
                                        -sourceVp.width() / 2.0 - step);
             // 1 new1 new1 new2 new2 2
-            isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
+            isocc = grid_map->CheckIfCollisionUsingLine(point1, newpoint1,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint1, newpoint2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint1, newpoint2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint2, point2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint2, point2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
@@ -255,19 +254,19 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
                                                   sourceVp.d_cr() - step,
                                                   -sourceVp.width() / 2.0);
             // 1 new1 new1 new2 new2 2
-            isocc = grid_map.CheckIfCollisionUsingLine(point1, newpoint1,
+            isocc = grid_map->CheckIfCollisionUsingLine(point1, newpoint1,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint1, newpoint2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint1, newpoint2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
               break;
             }
-            isocc = grid_map.CheckIfCollisionUsingLine(newpoint2, point2,
+            isocc = grid_map->CheckIfCollisionUsingLine(newpoint2, point2,
                                                        resolution / 2.0);
             if (isocc) {
               NotFinishTable[i] = 0.0;
@@ -337,14 +336,11 @@ std::vector<Eigen::MatrixXd> tttt(Box2d map_bound, const std::vector<POINT2D> ob
 int main() {
   std::cout << "Hello, World!" << std::endl;
   std::vector<Eigen::MatrixXd> hPolys;
-  GridMap grid_map;
-  Box2d map_bound = Box2d(POINT2D(0, 0), 50, 50);
-  std::vector<POINT2D> obs = getObstacleEnvTest(map_bound);
+  Box2d map_bound = Box2d(POINT2D(25, 25), 100, 100);
+  std::vector<POINT2D> obs = getObstacleEnvTest();
   std::vector<POINT3D> statelist = getStatesTest();
-  std::vector<POINT2D> test_obs;
-  std::vector<POINT3D> test_states;
-//  hPolys = getRectangleConst(map_bound, test_obs, test_states);
-  hPolys = tttt(map_bound, obs, statelist);
+  hPolys = getRectangleConst(map_bound, obs, statelist);
+//  hPolys = tttt(map_bound, obs, statelist);
   for (int i = 0; i < hPolys.size(); i++) {
     std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)
               << "," << hPolys[i](1, 0) << "," << hPolys[i](1, 1)
