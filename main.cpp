@@ -328,9 +328,20 @@ std::vector<Eigen::MatrixXd> getRectangleConst(Box2d map_bound, std::vector<POIN
   return hPolys_;
 }
 
-std::vector<Eigen::MatrixXd> tttt(Box2d map_bound, const std::vector<POINT2D> obs, std::vector<POINT3D> statelist) {
-  std::vector<Eigen::MatrixXd> hPolys_;
-  return hPolys_;
+void OutputFile(const std::vector<Eigen::MatrixXd>hPolys) {
+  std::ofstream outFile("../Sim/output.txt"); // 打开输出文件流
+
+  if (outFile.is_open()) { // 检查文件是否成功打开
+    for (const auto& hpoly : hPolys) {
+      outFile << hpoly(2, 0) << "," << hpoly(3, 0) << "," << hpoly(2, 1) << "," << hpoly(3, 1) << ","
+              << hpoly(2, 2) << "," << hpoly(3, 2) << "," << hpoly(2, 3) << "," << hpoly(3, 3) << "\n"; // 将每行数据写入文件，并在末尾添加换行符
+    }
+
+    outFile.close(); // 关闭文件流
+    std::cout << "Data has been written to output.txt" << std::endl;
+  } else {
+    std::cerr << "Error opening the file." << std::endl;
+  }
 }
 
 int main() {
@@ -341,11 +352,11 @@ int main() {
   std::vector<POINT3D> statelist = getStatesTest();
   hPolys = getRectangleConst(map_bound, obs, statelist);
 //  hPolys = tttt(map_bound, obs, statelist);
+  OutputFile(hPolys);
+
   for (int i = 0; i < hPolys.size(); i++) {
-    std::cout << "i," << hPolys[i](0, 0) << "," << hPolys[i](0, 1)
-              << "," << hPolys[i](1, 0) << "," << hPolys[i](1, 1)
-              << "," << hPolys[i](2, 0) << "," << hPolys[i](2, 1)
-              << "," << hPolys[i](3, 0) << "," << hPolys[i](3, 1) << std::endl;
+    std::cout << hPolys[i] << std::endl;
+    std::cout << std::endl;
   }
   return 0;
 }
