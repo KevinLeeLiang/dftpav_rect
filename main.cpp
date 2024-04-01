@@ -344,6 +344,140 @@ void OutputFile(const std::vector<Eigen::MatrixXd>hPolys) {
   }
 }
 
+
+ErrorType RunMINCOParking(){
+  //TO DO
+  traj_container_.clearSingul();
+  Eigen::MatrixXd flat_finalState(2, 3),  flat_headState(2,3);
+  Eigen::VectorXd ego_piece_dur_vec;
+  Eigen::MatrixXd ego_innerPs;
+  ROS_WARN("begin to run minco");
+  nav_msgs::Path debug_msg0,debug_msg1;
+  display_hPolys_.clear();
+  double worldtime =  head_state_.time_stamp;
+  double basetime = 0.0;
+
+  /*try to merge optimization process*/
+  std::vector<std::vector<Eigen::MatrixXd>> sfc_container;
+  std::vector<int> singul_container;
+  Eigen::VectorXd duration_container;
+  std::vector<Eigen::MatrixXd> waypoints_container;
+  std::vector<Eigen::MatrixXd> iniState_container,finState_container;
+  duration_container.resize(kino_trajs_.size());
+
+  for(unsigned int i = 0; i < kino_trajs_.size(); i++){
+    double timePerPiece = traj_piece_duration_;
+    plan_utils::FlatTrajData kino_traj = kino_trajs_.at(i);
+    singul_container.push_back(kino_traj.singul);
+    std::vector<Eigen::Vector3d> pts = kino_traj.traj_pts;
+    plan_utils::MinJerkOpt initMJO;
+    plan_utils::Trajectory initTraj;
+    int piece_nums;
+    double initTotalduration = 0.0;
+    for(const auto pt : pts){
+      initTotalduration += pt[2];
+    }
+    piece_nums = std::max(int(initTotalduration / timePerPiece + 0.5),2);
+    timePerPiece = initTotalduration / piece_nums;
+    ego_piece_dur_vec.resize(piece_nums);
+    ego_piece_dur_vec.setConstant(timePerPiece);
+    duration_container[i] = timePerPiece * piece_nums;
+    ego_innerPs.resize(2, piece_nums-1);
+    std::vector<Eigen::Vector3d> statelist;
+    double res_time = 0;
+    for(int i = 0; i < piece_nums; i++ ){
+      int resolution;
+      if(i==0||i==piece_nums-1){
+        resolution = dense_traj_res;
+      }
+      else{
+        resolution = traj_res;
+      }
+      for(int k = 0; k <= resolution; k++){
+        double t = basetime+res_time + 1.0*k/resolution*ego_piece_dur_vec[i];
+        Eigen::Vector3d pos = kino_path_finder_->evaluatePos(t);
+        statelist.push_back(pos);
+        if(k==resolution && i!=piece_nums-1){
+          ego_innerPs.col(i) = pos.head(2);
+        }
+      }
+      res_time += ego_piece_dur_vec[i];
+    }
+    std::cout<<"s: "<<kino_traj.singul<<"\n";
+    double tm1 = ros::Time::now().toSec();
+    getRectangleConst(statelist);
+    sfc_container.push_back(hPolys_);
+    display_hPolys_.insert(display_hPolys_.end(),hPolys_.begin(),hPolys_.end());
+    waypoints_container.push_back(ego_innerPs);
+    iniState_container.push_back(kino_traj.start_state);
+    finState_container.push_back(kino_traj.final_state);
+    basetime += initTotalduration;
+    //visualization
+    initMJO.reset(ego_piece_dur_vec.size());
+    initMJO.generate(ego_innerPs, timePerPiece,kino_traj.start_state, kino_traj.final_state);
+    initTraj = initMJO.getTraj(kino_traj.singul);
+    {
+      for(double t  = 0.0; t <= initTraj.getTotalDuration(); t+=0.01){
+        geometry_msgs::PoseStamped pose;
+        pose.header.frame_id = "map";
+        pose.pose.position.x = initTraj.getPos(t)[0];//x
+        pose.pose.position.y = initTraj.getPos(t)[1];//y
+        pose.pose.position.z = 0.2;
+        debug_msg1.poses.push_back(pose);
+      }
+      debug_msg1.header.frame_id = "map";
+    }
+    Debugtraj1Pub.publish(debug_msg1);
+  }
+  Debugtraj1Pub.publish(debug_msg1);
+
+  double t1= ros::Time::now().toSec();
+  if(map_itf_->GetMovingObsTraj(&sur_discretePoints)!=kSuccess){
+    return kWrongStatus;
+  }
+  ConverSurroundTrajFromPoints(sur_discretePoints,&surround_trajs);
+  double t2 = ros::Time::now().toSec();
+  std::cout<<"convert time: "<<(t2-t1)<<std::endl;
+  ploy_traj_opt_->setSurroundTrajs(&surround_trajs);
+  // ploy_traj_opt_->setSurroundTrajs(NULL);
+  std::cout<<"try to optimize!\n";
+
+  int flag_success = ploy_traj_opt_->OptimizeTrajectory(iniState_container, finState_container,
+                                                        waypoints_container,duration_container,
+                                                        sfc_container,  singul_container,worldtime,0.0);
+  std::cout<<"optimize ended!\n";
+
+
+
+  if (flag_success)
+  {
+    std::cout << "[PolyTrajManager] Planning success ! " << std::endl;
+    for(unsigned int i = 0; i < kino_trajs_.size(); i++){
+      traj_container_.addSingulTraj( (*ploy_traj_opt_->getMinJerkOptPtr())[i].getTraj(singul_container[i]), worldtime, ego_id_); // todo time
+      std::cout<<"init duration: "<<duration_container[i]<<std::endl;
+      std::cout<<"pieceNum: " << waypoints_container[i].cols() + 1 <<std::endl;
+      std::cout<<"optimized total duration: "<<(*ploy_traj_opt_->getMinJerkOptPtr())[i].getTraj(1).getTotalDuration()<<std::endl;
+      std::cout<<"optimized jerk cost: "<<(*ploy_traj_opt_->getMinJerkOptPtr())[i].getTrajJerkCost()<<std::endl;
+      worldtime = traj_container_.singul_traj.back().end_time;
+    }
+  }
+  else{
+    ROS_ERROR("[PolyTrajManager] Planning fails! ");
+    return kWrongStatus;
+  }
+  if(is_init){
+    //reset the timeStamp
+    for(auto & it:traj_container_.singul_traj ){
+      it.start_time = ros::Time::now().toSec()-head_state_.time_stamp+it.start_time;
+      it.end_time = ros::Time::now().toSec()-head_state_.time_stamp+it.end_time;
+    }
+  }
+
+  return kSuccess;
+
+}
+
+
 int main() {
   std::cout << "Hello, World!" << std::endl;
   std::vector<Eigen::MatrixXd> hPolys;

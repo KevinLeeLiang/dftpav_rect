@@ -73,7 +73,7 @@ def test():
   xe2, ye2, he2 = 45, 45, 90
   r1 = 20
   r2 = 20
-  count = 5
+  count = 20
   path1 = calculate_arc_points((xs1, ys1), (xe1, ye1), r1, count, False)
   path2 = calculate_arc_points((xs2, ys2), (xe2, ye2), r2, count, True)
 
